@@ -13,6 +13,11 @@ type Instagram struct {
 	ClientID   string
 }
 
+// Name return social network name.
+func (i *Instagram) Name() string {
+	return "Instagram"
+}
+
 // FetchSubscriptions implementation for instagram network.
 func (i *Instagram) FetchSubscriptions() ([]subscription.Subscription, error) {
 	image, err := url.Parse("https://raw.githubusercontent.com/ahmdrz/goinsta/v1/resources/goinsta-image.png")
