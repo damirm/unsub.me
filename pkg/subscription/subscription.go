@@ -1,17 +1,17 @@
 package subscription
 
 import (
-	"log"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
 )
 
-var socialNetworks []SocialNetwork
+var socialNetworks = make(map[string]SocialNetwork)
 
 // Subscription represents any social "subscription".
 // For example:
-// - instagram page
+// - instagram profile
 // - youtube channel
 // - github repository
 // - twitch channel
@@ -25,6 +25,7 @@ type Subscription struct {
 
 // Filter represents various of filters.
 type Filter struct {
+	SocialNetwork     string
 	LastActivityUntil time.Time
 	Name              string
 	Categories        []string
@@ -54,13 +55,27 @@ type SocialNetwork interface {
 }
 
 // RegisterSocialNetwork registers social network driver.
-func RegisterSocialNetwork(sn SocialNetwork) {
-	socialNetworks = append(socialNetworks, sn)
+func RegisterSocialNetwork(sns ...SocialNetwork) {
+	for _, sn := range sns {
+		socialNetworks[sn.Name()] = sn
+	}
 }
 
 // List returns filtered list of subscriptions.
 func List(filter Filter) (result []Subscription, err error) {
-	for _, sn := range socialNetworks {
+	var sns map[string]SocialNetwork
+
+	if filter.SocialNetwork != "" {
+		sn, ok := socialNetworks[filter.SocialNetwork]
+		if !ok {
+			return nil, fmt.Errorf("Unknown social network %s", filter.SocialNetwork)
+		}
+		sns[filter.SocialNetwork] = sn
+	} else {
+		sns = socialNetworks
+	}
+
+	for _, sn := range sns {
 		subs, err := sn.FetchSubscriptions()
 		if err != nil {
 			return nil, err
@@ -72,25 +87,6 @@ func List(filter Filter) (result []Subscription, err error) {
 			}
 		}
 	}
+
 	return
-}
-
-// UnsubscribeAll unsubscribes from all subscriptions.
-func UnsubscribeAll() error {
-	for _, sn := range socialNetworks {
-		subs, err := sn.FetchSubscriptions()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("Got %d subscriptions from %s social network\n", len(subs), sn.Name())
-
-		for _, s := range subs {
-			err := sn.Unsubscribe(s)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }

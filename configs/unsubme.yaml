@@ -1,0 +1,7 @@
+instagram:
+  client_id: 123
+  client_secret: 321
+
+twitch:
+  client_id: 123
+  client_secret: 123

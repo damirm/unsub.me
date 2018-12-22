@@ -32,6 +32,7 @@ func TestFilterLastActivityUntil(t *testing.T) {
 	testCases := []testCase{
 		makeTestCase(time.Now(), time.Now().Add(-1*time.Hour), false),
 		makeTestCase(time.Now().Add(-1*time.Hour), time.Now(), true),
+		makeTestCase(time.Now(), time.Now(), true),
 	}
 
 	runTestCases(t, testCases)

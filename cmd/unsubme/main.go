@@ -1,45 +1,73 @@
 package main
 
 import (
+	"log"
 	"os"
-	"time"
+	"os/user"
+	"path/filepath"
 
+	"github.com/damirm/unsub.me/cmd/unsubme/list"
+	"github.com/damirm/unsub.me/pkg/config"
 	"github.com/damirm/unsub.me/pkg/instagram"
 	"github.com/damirm/unsub.me/pkg/subscription"
+	"github.com/damirm/unsub.me/pkg/twitch"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-var until *time.Duration
+var configPath *string
+var cfg config.Config
+
+func registerAllSocialNetworks() {
+	inst := &instagram.Instagram{
+		ClientID:     cfg.Instagram.ClientID,
+		ClientSecret: cfg.Instagram.ClientSecret,
+	}
+	twi := &twitch.Twitch{
+		ClientID:     cfg.Twitch.ClientID,
+		ClientSecret: cfg.Twitch.ClientSecret,
+	}
+
+	subscription.RegisterSocialNetwork(inst, twi)
+}
 
 func main() {
-	sn := &instagram.Instagram{OAuthToken: "..."}
-	subscription.RegisterSocialNetwork(sn)
-
-	unsubscribeAll := &cobra.Command{
-		Use: "unsubscribe-all",
-		Run: func(cmd *cobra.Command, args []string) {
-			subscription.UnsubscribeAll()
-		},
-	}
-
-	list := &cobra.Command{
-		Use: "list",
-		Run: func(cmd *cobra.Command, args []string) {
-			filter := subscription.Filter{
-				LastActivityUntil: time.Now().Add(*until),
+	rootCmd := &cobra.Command{
+		Use: "unsubme",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			viper.SetConfigFile(*configPath)
+			viper.SetConfigType("yaml")
+			err := viper.ReadInConfig()
+			if err != nil {
+				return err
 			}
-			subscription.List(filter)
+			err = viper.Unmarshal(&cfg, func(decoderConfig *mapstructure.DecoderConfig) {
+				decoderConfig.TagName = "json"
+			})
+			if err != nil {
+				return err
+			}
+
+			registerAllSocialNetworks()
+
+			return nil
 		},
 	}
 
-	until = list.Flags().Duration("until", 0, "")
-
-	rootCmd := &cobra.Command{}
-	rootCmd.AddCommand(unsubscribeAll)
-	rootCmd.AddCommand(list)
-
-	err := rootCmd.Execute()
+	usr, err := user.Current()
 	if err != nil {
+		panic(err)
+	}
+
+	defaultConfigPath := filepath.Join(usr.HomeDir, ".unsubme.yaml")
+	configPath = rootCmd.PersistentFlags().StringP("config", "c", defaultConfigPath, "")
+
+	rootCmd.AddCommand(list.Command(&cfg))
+
+	err = rootCmd.Execute()
+	if err != nil {
+		log.Print(err)
 		os.Exit(1)
 	}
 }

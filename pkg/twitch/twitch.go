@@ -1,4 +1,4 @@
-package instagram
+package twitch
 
 import (
 	"net/url"
@@ -7,19 +7,19 @@ import (
 	"github.com/damirm/unsub.me/pkg/subscription"
 )
 
-// Instagram represents instagram social network.
-type Instagram struct {
+// Twitch represents instagram social network.
+type Twitch struct {
 	ClientID     string
 	ClientSecret string
 }
 
 // Name return social network name.
-func (i *Instagram) Name() string {
-	return "Instagram"
+func (i *Twitch) Name() string {
+	return "Twitch"
 }
 
 // FetchSubscriptions implementation for instagram network.
-func (i *Instagram) FetchSubscriptions() ([]subscription.Subscription, error) {
+func (i *Twitch) FetchSubscriptions() ([]subscription.Subscription, error) {
 	image, err := url.Parse("https://raw.githubusercontent.com/ahmdrz/goinsta/v1/resources/goinsta-image.png")
 	if err != nil {
 		return nil, err
@@ -51,6 +51,6 @@ func (i *Instagram) FetchSubscriptions() ([]subscription.Subscription, error) {
 }
 
 // Unsubscribe from instagram channel
-func (i *Instagram) Unsubscribe(s subscription.Subscription) error {
+func (i *Twitch) Unsubscribe(s subscription.Subscription) error {
 	return nil
 }
