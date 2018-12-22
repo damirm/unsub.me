@@ -1,0 +1,12 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ROOT = File.join(Dir.pwd, "..", "..")
+
+# FIXME: move provisioning here
+load File.expand_path(File.join(ROOT, "..", "..", "..", "..", "..", "vagrant", "Vagrantfile"))
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/xenial64"
+  config.vm.synced_folder ROOT, "/home/vagrant/go/src/github.com/damirm/unsub.me"
+end

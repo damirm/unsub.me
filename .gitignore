@@ -1,0 +1,5 @@
+*.retry
+.vagrant
+.idea
+build
+*.log
