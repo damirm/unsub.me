@@ -49,16 +49,27 @@ func (f *Filter) passes(s Subscription) bool {
 
 // SocialNetwork represents any social network with some kind of subscriptions.
 type SocialNetwork interface {
+	Init() error
 	Name() string
 	FetchSubscriptions() ([]Subscription, error)
 	Unsubscribe(Subscription) error
+
+	// TODO: Move to separate interface?
+	// Authentication/Authorization methods
+	AuthURL() *url.URL
+	OnAuthCode(string) error
 }
 
 // RegisterSocialNetwork registers social network driver.
-func RegisterSocialNetwork(sns ...SocialNetwork) {
+func RegisterSocialNetwork(sns ...SocialNetwork) error {
 	for _, sn := range sns {
+		err := sn.Init()
+		if err != nil {
+			return err
+		}
 		socialNetworks[sn.Name()] = sn
 	}
+	return nil
 }
 
 // List returns filtered list of subscriptions.
@@ -81,8 +92,7 @@ func List(filter Filter) (result []Subscription, err error) {
 			return nil, err
 		}
 		for _, s := range subs {
-			passes := filter.passes(s)
-			if passes {
+			if passes := filter.passes(s); passes {
 				result = append(result, s)
 			}
 		}

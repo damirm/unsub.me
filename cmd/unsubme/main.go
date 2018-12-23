@@ -6,6 +6,8 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/damirm/unsub.me/pkg/youtube"
+
 	"github.com/damirm/unsub.me/cmd/unsubme/list"
 	"github.com/damirm/unsub.me/pkg/config"
 	"github.com/damirm/unsub.me/pkg/instagram"
@@ -19,7 +21,7 @@ import (
 var configPath *string
 var cfg config.Config
 
-func registerAllSocialNetworks() {
+func registerAllSocialNetworks() error {
 	inst := &instagram.Instagram{
 		ClientID:     cfg.Instagram.ClientID,
 		ClientSecret: cfg.Instagram.ClientSecret,
@@ -28,8 +30,17 @@ func registerAllSocialNetworks() {
 		ClientID:     cfg.Twitch.ClientID,
 		ClientSecret: cfg.Twitch.ClientSecret,
 	}
+	youtube := &youtube.Youtube{
+		CredentialsFile: cfg.Youtube.CredentialsFile,
+	}
 
-	subscription.RegisterSocialNetwork(inst, twi)
+	sns := []subscription.SocialNetwork{
+		inst,
+		twi,
+		youtube,
+	}
+
+	return subscription.RegisterSocialNetwork(sns...)
 }
 
 func main() {
@@ -49,9 +60,7 @@ func main() {
 				return err
 			}
 
-			registerAllSocialNetworks()
-
-			return nil
+			return registerAllSocialNetworks()
 		},
 	}
 

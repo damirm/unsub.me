@@ -13,6 +13,10 @@ type Instagram struct {
 	ClientSecret string
 }
 
+func (i *Instagram) Init() error {
+	return nil
+}
+
 // Name return social network name.
 func (i *Instagram) Name() string {
 	return "Instagram"
@@ -52,5 +56,15 @@ func (i *Instagram) FetchSubscriptions() ([]subscription.Subscription, error) {
 
 // Unsubscribe from instagram channel
 func (i *Instagram) Unsubscribe(s subscription.Subscription) error {
+	return nil
+}
+
+// AuthURL returns instagram oauth url.
+func (i *Instagram) AuthURL() *url.URL {
+	res, _ := url.Parse("")
+	return res
+}
+
+func (y *Instagram) OnAuthCode(code string) error {
 	return nil
 }

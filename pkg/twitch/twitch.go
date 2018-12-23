@@ -13,6 +13,10 @@ type Twitch struct {
 	ClientSecret string
 }
 
+func (i *Twitch) Init() error {
+	return nil
+}
+
 // Name return social network name.
 func (i *Twitch) Name() string {
 	return "Twitch"
@@ -52,5 +56,15 @@ func (i *Twitch) FetchSubscriptions() ([]subscription.Subscription, error) {
 
 // Unsubscribe from instagram channel
 func (i *Twitch) Unsubscribe(s subscription.Subscription) error {
+	return nil
+}
+
+// AuthURL returns twitch oauth url.
+func (i *Twitch) AuthURL() *url.URL {
+	res, _ := url.Parse("")
+	return res
+}
+
+func (y *Twitch) OnAuthCode(code string) error {
 	return nil
 }
